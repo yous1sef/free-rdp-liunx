@@ -1,52 +1,29 @@
-name: Ubuntu Desktop with noVNC and Tunnel
+name: mydukaana- LiteManager
 
 on:
   workflow_dispatch:
 
 jobs:
-  run-desktop:
-    runs-on: ubuntu-latest
-
+  build:
+    name: Start Building...
+    runs-on: windows-latest
+    timeout-minutes: 9999
+    
     steps:
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y xfce4 xfce4-goodies tightvncserver git curl wget openssh-client
-        sudo apt install -y python3 python3-pip
-        pip3 install websockify
+      - name: Downloading & Installing Essentials
+        run: |
+          Invoke-WebRequest -Uri "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
+          cmd /c Downloads.bat
 
-    - name: Setup VNC server and noVNC
-      run: |
-        mkdir -p ~/.vnc
-        echo "123456" | vncpasswd -f > ~/.vnc/passwd
-        chmod 600 ~/.vnc/passwd
+      - name: Connect to LiteManager
+        run: cmd /c show.bat
 
-        echo '#!/bin/bash
-        xrdb $HOME/.Xresources
-        startxfce4 &' > ~/.vnc/xstartup
-        chmod +x ~/.vnc/xstartup
+      - name: Time Counter
+        run: cmd /c loop.bat
 
-        vncserver :1 -geometry 1280x720 -depth 24
-        vncserver -kill :1
-        vncserver :1 -geometry 1280x720 -depth 24
 
-        git clone https://github.com/novnc/noVNC.git ~/noVNC
-        git clone https://github.com/novnc/websockify.git ~/noVNC/utils/websockify
 
-    - name: Run noVNC server
-      run: |
-        nohup ~/noVNC/utils/launch.sh --vnc localhost:5901 --listen 6080 &
 
-    - name: Create tunnel with serveo.net
-      run: |
-        nohup ssh -o StrictHostKeyChecking=no -R 80:localhost:6080 serveo.net &
-        sleep 10
-        echo "🚀 Tunnel should be up! Check logs below for the public URL."
-        ps aux | grep ssh
 
-    - name: Show connection info
-      run: |
-        echo "-------------------------------------------"
-        echo "🔑 VNC password: 123456"
-        echo "🌐 Open the public URL from the previous step in your browser"
-        echo "-------------------------------------------"
+
+
